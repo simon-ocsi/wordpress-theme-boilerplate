@@ -1,0 +1,23 @@
+.env
+.DS_Store
+Thumbs.db
+
+# WordPress runtime content
+wp-content/uploads/
+wp-content/cache/
+wp-content/upgrade/
+wp-content/languages/
+wp-content/plugins/*
+!wp-content/plugins/index.php
+
+# Database dumps are local by default
+# Remove this rule only if your team intentionally versions a sanitised seed DB.
+database/*.sql
+
+# Theme build artefacts
+wp-content/themes/*/node_modules/
+wp-content/themes/*/dist/
+
+# Logs
+*.log
+npm-debug.log*

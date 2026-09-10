@@ -1,0 +1,30 @@
+{
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "prettier.prettierPath": "wp-content/themes/starter-theme/node_modules/prettier",
+  "eslint.validate": ["javascript"],
+  "eslint.workingDirectories": [
+    {
+      "directory": "wp-content/themes/starter-theme",
+      "changeProcessCWD": true
+    }
+  ],
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[scss]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[css]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "intelephense.diagnostics.undefinedFunctions": false,
+  "chat.tools.terminal.autoApprove": {
+    "npm run build": true
+  }
+}

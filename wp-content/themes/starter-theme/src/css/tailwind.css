@@ -1,0 +1,50 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+
+  /* Replace these neutral starter tokens with your project's brand palette. */
+  --color-brand-50: #eef7ff;
+  --color-brand-100: #d9edff;
+  --color-brand-200: #bce0ff;
+  --color-brand-300: #8ecdff;
+  --color-brand-400: #59b0ff;
+  --color-brand-500: #328fff;
+  --color-brand-600: #1b6ff5;
+  --color-brand-700: #1458e1;
+  --color-brand-800: #1748b6;
+  --color-brand-900: #193f8f;
+}
+
+@media (min-width: 783px) {
+  .admin-bar #site-header { top: 32px; }
+}
+
+@media (max-width: 782px) {
+  .admin-bar #site-header { top: 46px; }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-semibold no-underline transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2;
+  }
+
+  .btn-primary {
+    @apply bg-brand-600 text-white hover:bg-brand-700;
+  }
+
+  .btn-secondary {
+    @apply border border-slate-300 bg-white text-slate-800 hover:bg-slate-50;
+  }
+
+  .content {
+    @apply text-base leading-7 text-slate-700;
+  }
+
+  .content > * + * { margin-top: 1.25em; }
+  .content h2 { @apply mt-10 text-2xl font-semibold tracking-tight text-slate-950; }
+  .content h3 { @apply mt-8 text-xl font-semibold text-slate-950; }
+  .content a { @apply text-brand-700 underline underline-offset-2; }
+  .content ul { @apply list-disc pl-6; }
+  .content ol { @apply list-decimal pl-6; }
+}
