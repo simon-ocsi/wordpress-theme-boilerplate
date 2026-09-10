@@ -8,6 +8,7 @@ A deliberately small classic WordPress theme scaffold. It is intended to provide
 - Tailwind CSS v4
 - SCSS entry point
 - ESLint and Prettier
+- Reproducible npm dependencies via `package-lock.json`
 - Lucide icons
 - Accessible responsive navigation scaffold
 - Basic `index`, `page`, `single` and `404` templates
@@ -17,7 +18,7 @@ A deliberately small classic WordPress theme scaffold. It is intended to provide
 ## Asset workflow
 
 ```powershell
-npm install
+npm ci
 npm run dev
 ```
 

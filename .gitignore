@@ -21,3 +21,6 @@ wp-content/themes/*/dist/
 # Logs
 *.log
 npm-debug.log*
+
+# PHP tooling dependencies
+/vendor/

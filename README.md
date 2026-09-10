@@ -14,19 +14,22 @@ Project-specific content models, copy, plugins and business logic should be adde
 - WordPress 7.1 / PHP 8.3 / Apache
 - MariaDB 11.4
 - WP-CLI
-- phpMyAdmin
+- phpMyAdmin 5.2.3
 - Vite 7
 - Tailwind CSS v4 via `@tailwindcss/vite`
 - Sass
 - ESLint and Prettier
+- PHPCS with WordPress Coding Standards
+- GitHub Actions CI
 - Lucide icons
 - Optional ACF Local JSON workflow
 
 ## Requirements
 
 - Docker Desktop
-- Node.js 20.19+ (or a compatible newer LTS release)
+- Node.js 20.19+ (the repository includes `.nvmrc`)
 - npm
+- Composer 2 (only needed locally if you want to run PHPCS outside CI)
 - PowerShell 7+ **or** a POSIX-compatible shell for the included helper scripts
 - Git
 
@@ -39,7 +42,7 @@ Copy-Item .env.example .env
 .\scripts\setup-theme.ps1 -ThemeName "My Project" -ThemeSlug "my-project"
 docker compose up -d
 cd wp-content/themes/my-project
-npm install
+npm ci
 npm run dev
 ```
 
@@ -85,12 +88,37 @@ docker compose down -v
 Run from the theme directory:
 
 ```powershell
+npm ci
 npm run build
 ```
 
 This creates `dist/` and a Vite manifest. The theme's PHP asset loader uses the Vite development server only when WordPress reports the `local` environment; otherwise it loads the built assets from the manifest.
 
 Do not deploy the local `wp-config.php` unchanged to a production environment.
+
+## Code quality and CI
+
+The boilerplate commits `package-lock.json`, so use `npm ci` for reproducible installs. `.nvmrc` pins the baseline Node.js runtime used by CI.
+
+GitHub Actions runs the following checks on pushes and pull requests:
+
+```text
+npm ci
+npm run lint
+npm run format:check
+npm run build
+php -l
+composer phpcs
+```
+
+PHP coding standards are configured in `phpcs.xml.dist` using the WordPress Coding Standards package. To run the PHP checks locally, install Composer dependencies from the repository root and run:
+
+```powershell
+composer install
+composer phpcs
+```
+
+Use `composer phpcbf` to automatically fix PHPCS issues that are safe to correct mechanically.
 
 ## Database scripts
 
@@ -153,9 +181,13 @@ Keep project-specific concerns out of the boilerplate: client branding, content 
 ```text
 .
 ├── .env.example
+├── .github/workflows/ci.yml
+├── .nvmrc
 ├── .vscode/
+├── composer.json
 ├── database/
 ├── docker-compose.yml
+├── phpcs.xml.dist
 ├── php/
 ├── scripts/
 ├── wp-config.php
@@ -172,6 +204,7 @@ Keep project-specific concerns out of the boilerplate: client branding, content 
             ├── template-parts/
             ├── functions.php
             ├── package.json
+            ├── package-lock.json
             ├── style.css
             └── vite.config.js
 ```

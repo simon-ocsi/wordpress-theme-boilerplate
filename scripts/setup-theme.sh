@@ -30,7 +30,7 @@ find "$NEW_DIR" -type f \( -name '*.php' -o -name '*.js' -o -name '*.css' -o -na
 ' {} +
 
 perl -0pi -e 's/starter-theme/$ENV{THEME_SLUG}/g' .vscode/settings.json
-perl -0pi -e 's/THEME_SLUG=starter-theme/THEME_SLUG=$ENV{THEME_SLUG}/g' .env.example
+perl -0pi -e 's/starter-theme/$ENV{THEME_SLUG}/g' .github/workflows/ci.yml phpcs.xml.dist
 
 echo "Created '$THEME_NAME' in $NEW_DIR"
-echo "Next: cd $NEW_DIR && npm install && npm run dev"
+echo "Next: cd $NEW_DIR && npm ci && npm run dev"

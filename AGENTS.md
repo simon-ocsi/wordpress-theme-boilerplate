@@ -33,6 +33,16 @@ Do not maintain a separate custom export/import implementation for ACF when the 
 ## Theme development
 
 - Run front-end commands from the active theme directory.
+- Use `npm ci` rather than `npm install` when installing committed dependencies.
 - Use `npm run dev` for local Vite development and `npm run build` before validating a production-ready change.
+- Before completing theme changes, run `npm run lint`, `npm run format:check`, `npm run build`, PHP syntax checks and `composer phpcs` when Composer tooling is available.
 - Keep reusable environment concerns separate from project-specific copy, branding, analytics, content models and business logic.
 - Follow the existing PHP naming/text-domain conventions after the starter has been renamed with `scripts/setup-theme.ps1` or `scripts/setup-theme.sh`.
+
+
+## Dependency and CI rules
+
+- Keep `package.json` and `package-lock.json` in sync. Do not delete or regenerate the lockfile without a dependency change.
+- Respect the Node.js baseline in `.nvmrc`.
+- Keep Docker image versions pinned deliberately; do not switch development services to floating `latest` tags.
+- If the starter theme slug is renamed, ensure CI and `phpcs.xml.dist` reference the renamed theme directory. The provided setup scripts handle this automatically.

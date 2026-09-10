@@ -1,0 +1,19 @@
+{
+  "name": "starter/wordpress-theme-boilerplate",
+  "description": "Development tooling for the WordPress theme boilerplate.",
+  "type": "project",
+  "require-dev": {
+    "dealerdirect/phpcodesniffer-composer-installer": "^1.1",
+    "wp-coding-standards/wpcs": "^3.2"
+  },
+  "scripts": {
+    "phpcs": "phpcs",
+    "phpcbf": "phpcbf"
+  },
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    },
+    "sort-packages": true
+  }
+}

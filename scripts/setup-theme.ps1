@@ -31,9 +31,13 @@ $settings = Get-Content -Raw '.vscode/settings.json'
 $settings = $settings.Replace('starter-theme', $ThemeSlug)
 Set-Content -Encoding utf8 '.vscode/settings.json' $settings
 
-$envExample = Get-Content -Raw '.env.example'
-$envExample = $envExample.Replace('THEME_SLUG=starter-theme', "THEME_SLUG=$ThemeSlug")
-Set-Content -Encoding utf8 '.env.example' $envExample
+$projectFiles = @('.github/workflows/ci.yml', 'phpcs.xml.dist')
+foreach ($projectFile in $projectFiles) {
+    $content = Get-Content -Raw $projectFile
+    $content = $content.Replace('starter-theme', $ThemeSlug)
+    Set-Content -Encoding utf8 $projectFile $content
+}
+
 
 Write-Host "Created '$ThemeName' in $newDir" -ForegroundColor Green
-Write-Host "Next: cd $newDir; npm install; npm run dev"
+Write-Host "Next: cd $newDir; npm ci; npm run dev"

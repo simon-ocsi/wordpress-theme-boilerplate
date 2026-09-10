@@ -57,7 +57,7 @@ services:
     working_dir: /var/www/html
 
   phpmyadmin:
-    image: phpmyadmin:latest
+    image: phpmyadmin:5.2.3-apache
     restart: unless-stopped
     depends_on:
       db:
