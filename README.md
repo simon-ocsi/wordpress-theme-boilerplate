@@ -110,13 +110,35 @@ Database dumps are ignored by default. Only version a sanitised seed database wh
 
 ## ACF Local JSON
 
-The starter theme contains an empty `acf-json/` directory. If a project uses ACF PRO, keep field group JSON there and commit it to Git.
+The starter theme contains an empty `acf-json/` directory. If a project uses ACF, keep field group JSON there and commit it to Git. ACF writes Local JSON automatically when field groups are saved in WordPress admin.
 
-With ACF PRO installed and active:
+For changes made in code or pulled from Git, **WP-CLI is the canonical sync mechanism**. The included PowerShell and shell scripts are convenience wrappers around the same commands. ACF 6.8+ is recommended for this workflow.
+
+Check whether JSON and the database differ:
 
 ```powershell
+docker compose run --rm wpcli acf json status
+# or
+.\scripts\acf-status.ps1
+```
+
+Preview a sync without changing the database:
+
+```powershell
+docker compose run --rm wpcli acf json sync --dry-run
+# or
+.\scripts\acf-sync.ps1 -DryRun
+```
+
+Apply the JSON changes to WordPress:
+
+```powershell
+docker compose run --rm wpcli acf json sync
+# or
 .\scripts\acf-sync.ps1
 ```
+
+Coding agents should use the WP-CLI commands directly unless there is a reason to use the host-specific helper scripts. See `AGENTS.md` for the expected agent workflow.
 
 ACF itself is not included in this repository because licensing and plugin requirements vary by project.
 
@@ -160,4 +182,4 @@ The defaults in `.env.example` and `wp-config.php` are for local development onl
 
 ## macOS / Linux helper equivalents
 
-The `scripts/` directory also includes `setup-theme.sh`, `db-backup.sh`, `db-restore.sh` and `acf-sync.sh` for teams not using PowerShell.
+The `scripts/` directory also includes `setup-theme.sh`, `db-backup.sh`, `db-restore.sh`, `acf-status.sh` and `acf-sync.sh` for teams not using PowerShell.
