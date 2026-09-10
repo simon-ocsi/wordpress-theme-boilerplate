@@ -4,16 +4,22 @@ set -eu
 backup_file="database/wordpress.sql"
 container_backup_file="/tmp/wordpress.sql"
 
-[ -f "$backup_file" ] || {
-    echo "Database backup not found: $backup_file" >&2
-    exit 1
-}
+if [ ! -f "$backup_file" ]; then
+	echo "Database backup not found: $backup_file" >&2
+	exit 1
+fi
 
 echo "Restoring local WordPress database..."
 
-# Copy the dump into the container and import it there byte-for-byte.
+# Copy the SQL dump into the database container byte-for-byte.
 docker compose cp "$backup_file" "db:$container_backup_file"
-docker compose exec -T db sh -lc 'mariadb -u root -p"$MARIADB_ROOT_PASSWORD" --default-character-set=utf8mb4 "$MARIADB_DATABASE" < /tmp/wordpress.sql'
+
+# Restore inside the database container using its configured environment
+# variables for the database password and database name.
+docker compose exec -T db sh -lc \
+	'mariadb -u root -p"$MARIADB_ROOT_PASSWORD" --default-character-set=utf8mb4 "$MARIADB_DATABASE" < /tmp/wordpress.sql'
+
+# Remove the temporary dump from the container.
 docker compose exec -T db rm -f "$container_backup_file"
 
 echo "Database restored from $backup_file"
