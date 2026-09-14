@@ -3,11 +3,11 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
   },
-  "prettier.prettierPath": "wp-content/themes/starter-theme/node_modules/prettier",
+  "prettier.prettierPath": "wp-content/themes/encoding-test/node_modules/prettier",
   "eslint.validate": ["javascript"],
   "eslint.workingDirectories": [
     {
-      "directory": "wp-content/themes/starter-theme",
+      "directory": "wp-content/themes/encoding-test",
       "changeProcessCWD": true
     }
   ],

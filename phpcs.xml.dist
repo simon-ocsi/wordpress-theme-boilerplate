@@ -2,7 +2,7 @@
 <ruleset name="WordPress Theme Boilerplate">
     <description>WordPress Coding Standards for the starter theme.</description>
 
-    <file>wp-content/themes/starter-theme</file>
+    <file>wp-content/themes/encoding-test</file>
 
     <exclude-pattern>*/node_modules/*</exclude-pattern>
     <exclude-pattern>*/dist/*</exclude-pattern>
