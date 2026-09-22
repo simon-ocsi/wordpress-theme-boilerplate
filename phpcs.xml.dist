@@ -7,6 +7,8 @@
     <exclude-pattern>*/node_modules/*</exclude-pattern>
     <exclude-pattern>*/dist/*</exclude-pattern>
     <exclude-pattern>*/acf-json/*</exclude-pattern>
+    <!-- Third-party library, checked upstream. -->
+    <exclude-pattern>*/inc/tgmpa/*</exclude-pattern>
 
     <arg name="extensions" value="php" />
     <arg value="sp" />

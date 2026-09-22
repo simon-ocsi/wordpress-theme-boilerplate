@@ -23,6 +23,7 @@ Project-specific content models, copy, plugins and business logic should be adde
 - GitHub Actions CI
 - Lucide icons
 - Optional ACF Local JSON workflow
+- Optional WP Migrate Lite workflow, recommended through TGM Plugin Activation
 
 ## Requirements
 
@@ -136,6 +137,29 @@ Restore it:
 
 Database dumps are ignored by default. Only version a sanitised seed database when your project explicitly needs one.
 
+## Restore a WP Migrate Lite export
+
+The starter theme recommends [WP Migrate Lite](https://wordpress.org/plugins/wp-migrate-db/) as an optional plugin through TGM Plugin Activation. Install it from the WordPress admin notice when a project uses this workflow; the theme does not require or automatically activate it.
+
+Export the production site from **WP Migrate > Export**. The restore helpers accept a full-site `.zip`, a database `.sql`, or a compressed `.sql.gz` export. They start Docker, create timestamped local database and uploads backups, import the export, safely replace serialized production URLs with the local URL, flush caches, and verify WordPress.
+
+PowerShell:
+
+```powershell
+.\scripts\import-wp-migrate.ps1 -ImportFile .\path\to\export.zip `
+  -ProductionUrl "https://www.example.com"
+```
+
+macOS/Linux:
+
+```sh
+./scripts/import-wp-migrate.sh ./path/to/export.zip https://www.example.com
+```
+
+The local URL defaults to `http://localhost:8080` (or `WORDPRESS_PORT` when set). Override it with `-LocalUrl` in PowerShell or a third shell argument. A full-site export restores `uploads`; database-only exports leave local uploads unchanged. Pre-import backups are written to the ignored `database/backups/` directory.
+
+This is a destructive local restore. Confirm the production URL and keep the generated backup until you have verified the imported site. Do not commit production exports because they may contain credentials or personal data.
+
 ## ACF Local JSON
 
 The starter theme contains an empty `acf-json/` directory. If a project uses ACF, keep field group JSON there and commit it to Git. ACF writes Local JSON automatically when field groups are saved in WordPress admin.
@@ -215,4 +239,4 @@ The defaults in `.env.example` and `wp-config.php` are for local development onl
 
 ## macOS / Linux helper equivalents
 
-The `scripts/` directory also includes `setup-theme.sh`, `db-backup.sh`, `db-restore.sh`, `acf-status.sh` and `acf-sync.sh` for teams not using PowerShell.
+The `scripts/` directory also includes `setup-theme.sh`, `db-backup.sh`, `db-restore.sh`, `import-wp-migrate.sh`, `acf-status.sh` and `acf-sync.sh` for teams not using PowerShell.

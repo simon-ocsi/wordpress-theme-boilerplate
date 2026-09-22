@@ -12,7 +12,8 @@ wp-content/plugins/*
 
 # Database dumps are local by default
 # Remove this rule only if your team intentionally versions a sanitised seed DB.
-database/*.sql
+# database/*.sql
+# database/backups/
 
 # Theme build artefacts
 wp-content/themes/*/node_modules/

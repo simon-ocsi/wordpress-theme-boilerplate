@@ -8,6 +8,7 @@
 defined( 'ABSPATH' ) || exit;
 
 require_once get_template_directory() . '/inc/nav-walker.php';
+require_once get_template_directory() . '/inc/recommended-plugins.php';
 
 /**
  * Configure theme supports and menus.
