@@ -1,0 +1,188 @@
+name: Build and deploy theme
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "wp-content/themes/localinsight/**"
+      - ".github/workflows/deploy-theme.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: production-theme-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Build and deploy Local Insight theme
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    # Repository secrets (not a gated Environment) so any collaborator with
+    # write access can deploy by pushing to main or running this workflow.
+    # Server-side forced rrsync is the security boundary, not GitHub approvals.
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.19.0"
+          cache: npm
+          cache-dependency-path: wp-content/themes/localinsight/package-lock.json
+
+      - name: Install theme dependencies
+        working-directory: wp-content/themes/localinsight
+        run: npm ci
+
+      - name: Build production theme assets
+        working-directory: wp-content/themes/localinsight
+        run: npm run build
+
+      - name: Validate build outputs
+        run: |
+          set -euo pipefail
+
+          theme='wp-content/themes/localinsight'
+
+          test -d "$theme"
+          test -f "$theme/style.css"
+          test -f "$theme/dist/manifest.json"
+          test -d "$theme/dist/assets"
+          test -n "$(find "$theme/dist/assets" -type f -print -quit)"
+
+          test -d "$theme/acf-json"
+          test -n "$(find "$theme/acf-json" -type f -name '*.json' -print -quit)"
+
+          # Update this list if new Vite entry points are added to the theme.
+          THEME_DIR="$theme" node <<'NODE'
+          const fs = require('node:fs')
+          const path = require('node:path')
+
+          const theme = process.env.THEME_DIR
+          const dist = path.resolve(theme, 'dist')
+
+          const manifest = JSON.parse(
+            fs.readFileSync(path.join(dist, 'manifest.json'), 'utf8'),
+          )
+
+          const entries = [
+            'src/js/app.js',
+            'src/js/chart-builder.js',
+            'src/js/indicator-import.js',
+          ]
+
+          for (const name of entries) {
+            const entry = manifest[name]
+
+            if (!entry || typeof entry.file !== 'string') {
+              throw new Error(`Missing built manifest entry: ${name}`)
+            }
+
+            for (const relativeFile of [entry.file, ...(entry.css ?? [])]) {
+              const output = path.resolve(dist, relativeFile)
+
+              if (!output.startsWith(`${dist}${path.sep}`)) {
+                throw new Error(`Unsafe build output path: ${relativeFile}`)
+              }
+
+              if (!fs.existsSync(output) || !fs.statSync(output).isFile()) {
+                throw new Error(`Missing build output: ${relativeFile}`)
+              }
+            }
+          }
+          NODE
+
+      - name: Validate deployment secrets
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+        run: |
+          set -euo pipefail
+
+          : "${DEPLOY_HOST:?DEPLOY_HOST secret is required}"
+          : "${DEPLOY_USER:?DEPLOY_USER secret is required}"
+
+          [[ "$DEPLOY_USER" =~ ^[a-z_][a-z0-9_-]*$ ]]
+          [[ "$DEPLOY_HOST" =~ ^[A-Za-z0-9.-]+$ ]]
+
+          if [ "$DEPLOY_USER" != "wp-theme-deploy" ]; then
+            echo "DEPLOY_USER must be wp-theme-deploy (restricted rsync account)." >&2
+            exit 1
+          fi
+
+      - name: Configure SSH
+        env:
+          DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+
+          umask 077
+          install -d -m 700 "$HOME/.ssh"
+
+          if [ -z "${DEPLOY_SSH_PRIVATE_KEY:-}" ] || [ -z "${DEPLOY_KNOWN_HOSTS:-}" ]; then
+            echo "Missing DEPLOY_SSH_PRIVATE_KEY or DEPLOY_KNOWN_HOSTS." >&2
+            exit 1
+          fi
+
+          printf '%s\n' "$DEPLOY_SSH_PRIVATE_KEY" > "$HOME/.ssh/deploy_key"
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/deploy_key" "$HOME/.ssh/known_hosts"
+
+      - name: Deploy built theme
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+        run: |
+          set -euo pipefail
+
+          # Remote destination is relative (./). The server forced command
+          # roots write-only rrsync at the production theme directory.
+          # Do not pass /var/www, a home path, or WordPress root here.
+          rsync \
+            -a \
+            --no-owner \
+            --no-group \
+            --no-links \
+            --chmod=D2755,F0644 \
+            --delete-after \
+            -e "ssh -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$HOME/.ssh/known_hosts -i $HOME/.ssh/deploy_key" \
+            --exclude='.DS_Store' \
+            --exclude='.env' \
+            --exclude='.env.*' \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='.idea/' \
+            --exclude='.vscode/' \
+            --exclude='*.map' \
+            --exclude='*.sql' \
+            --exclude='*.log' \
+            --exclude='node_modules/' \
+            --exclude='.cache/' \
+            --exclude='coverage/' \
+            --exclude='tests/' \
+            --exclude='uploads/' \
+            --exclude='.prettierrc' \
+            --exclude='eslint.config.js' \
+            --exclude='package.json' \
+            --exclude='package-lock.json' \
+            --exclude='README.md' \
+            --exclude='vite.config.js' \
+            'wp-content/themes/localinsight/' \
+            "${DEPLOY_USER}@${DEPLOY_HOST}:./"
+
+      - name: Remove deployment SSH key
+        if: always()
+        run: |
+          rm -f "$HOME/.ssh/deploy_key"
